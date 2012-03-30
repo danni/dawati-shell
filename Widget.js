@@ -6,6 +6,8 @@ imports.gi.versions.Mx = '2.0';
 const Mx = imports.gi.Mx;
 const GObject = imports.gi.GObject;
 
+const DEGREES = "\u00B0";
+
 const Button = new Lang.Class({
   Name: 'Button',
   Extends: Mx.Button,
@@ -66,7 +68,58 @@ const Widget = new Lang.Class({
   {
     this.parent();
     this._proxy = proxy;
+
     this._block_text_changed = 0;
+
+    this._entry_timeout = 0;
+    this._weather_timeout = 0;
+  },
+
+  _update_weather : function (id)
+  {
+    this._spinner.show()
+    this._proxy.request_location_async(id,
+        Lang.bind(this, function (weather)
+      {
+        this._spinner.hide();
+        weather.dump();
+
+        if (this._weather)
+          {
+            /* FIXME: generates a lot of unmap warnings */
+            this._weather.destroy();
+          }
+
+        let table = new Mx.Table();
+        this._table.add_actor(table, 1, 0);
+        this._table.child_set_column_span(table, 2);
+
+        table.add_actor(new Mx.Label({ 'text': "Now" }), 0, 0);
+        table.add_actor(
+            new Mx.Label({ 'text': weather.current.temp + DEGREES }),
+            0, 2);
+
+        for (let i = 0; i < weather.forecast.length; i++)
+          {
+            let forecast = weather.forecast[i];
+
+            table.add_actor(
+                new Mx.Label({ 'text': forecast.dayname }),
+                i + 1, 0);
+            /* FIXME: icon */
+            table.add_actor(
+                new Mx.Label({ 'text': forecast.hightemp + DEGREES }),
+                i + 1, 2);
+            table.add_actor(
+                new Mx.Label({ 'text': forecast.lowtemp + DEGREES }),
+                i + 1, 3);
+          }
+
+        this._weather = table;
+      }));
+
+    this._weather_timeout = 0;
+    return true;
   },
 
   _construct_completion : function (entry)
@@ -118,8 +171,15 @@ const Widget = new Lang.Class({
       {
         this._block_text_changed++;
 
-        print(button.id);
         entry.set_text(button.get_label());
+
+        if (this._weather_timeout > 0)
+            MainLoop.source_remove(this._weather_timeout);
+
+        this._weather_timeout = MainLoop.timeout_add_seconds(60 * 60,
+            Lang.bind(this, function () { this._update_weather(button.id) } ));
+
+        this._update_weather(button.id);
         frame.hide();
 
         this._block_text_changed--;
@@ -168,7 +228,6 @@ const Widget = new Lang.Class({
     let spinner = new Mx.Spinner({ 'visible': false });
     table.add_actor(spinner, 0, 1);
 
-    this._entry_timeout = 0;
     entry.clutter_text.connect('text-changed', Lang.bind(this, function ()
       {
         if (this._block_text_changed > 0)
@@ -226,6 +285,9 @@ const Widget = new Lang.Class({
             return false;
           }));
       }));
+
+    this._spinner = spinner;
+    this._table = table;
 
     return table;
   },
