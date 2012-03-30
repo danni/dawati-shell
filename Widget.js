@@ -107,7 +107,7 @@ const Widget = new Lang.Class({
     stage.add_actor(frame);
 
     frame.raise_top();
-    frame.set_position(14, 167); // huh?
+    frame.set_position(entry.get_x(), entry.get_y() + entry.get_height());
     frame.hide();
 
     let model = Clutter.ListModel.newv(
