@@ -149,9 +149,9 @@ const AccuweatherProxy = new Lang.Class({
     call.set_function(FIND_CITY_FUNC);
     call.add_param('location', city);
 
-    call.call_async(null, function (call, result)
+    call.invoke_async(null, function (call, result)
       {
-        call.call_finish(result);
+        call.invoke_finish(result);
 
         let parser = new Rest.XmlParser();
         let dom = parser.parse_from_data(call.get_payload(),
@@ -182,9 +182,9 @@ const AccuweatherProxy = new Lang.Class({
     call.add_param('location', cityid);
     call.add_param('metric', '1');
 
-    call.call_async(null, function (call, result)
+    call.invoke_async(null, function (call, result)
       {
-        call.call_finish(result);
+        call.invoke_finish(result);
 
         let parser = new Rest.XmlParser();
         let dom = parser.parse_from_data(call.get_payload(),
