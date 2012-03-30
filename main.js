@@ -1,28 +1,19 @@
-// imports.gi.versions.Mx = '2.0';
-
-// const Mx = imports.gi.Mx;
-
 const MainLoop = imports.mainloop;
+const Clutter = imports.gi.Clutter;
 
 const Weather = imports.Weather;
+const Widget = imports.Widget;
 
 function main()
 {
+  Clutter.init(null, null);
+
+  let stage = Clutter.Stage.get_default();
   let proxy = new Weather.AccuweatherProxy();
+  let widget = new Widget.Widget(proxy);
 
-  proxy.search_locations_async('Melbourne', function(locations)
-    {
-      print("Success 1");
-      print(locations[0]);
-      proxy.request_location_async(locations[0].get_id(), function(report)
-        {
-          print("Success A");
-
-          report.dump();
-
-          MainLoop.quit('main');
-        });
-    });
+  stage.add_actor(widget.get_actor());
+  stage.show_all();
 
   MainLoop.run('main');
 }
