@@ -6,6 +6,57 @@ imports.gi.versions.Mx = '2.0';
 const Mx = imports.gi.Mx;
 const GObject = imports.gi.GObject;
 
+const Button = new Lang.Class({
+  Name: 'Button',
+  Extends: Mx.Button,
+  Properties: {
+    'id': GObject.ParamSpec.string('id', '', '',
+        GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE,
+        ''),
+  },
+
+  _init : function (params)
+  {
+    this.parent(params);
+    this._id = '';
+  },
+
+  get id ()
+  {
+    return this._id;
+  },
+
+  set id (val)
+  {
+    this._id = val;
+  },
+});
+
+const ButtonFactory = new Lang.Class({
+  Name: 'ButtonFactory',
+  Extends: GObject.Object,
+  Implements: [ Mx.ItemFactory ],
+
+  _init : function (callback)
+  {
+    this.parent();
+    this._callback = callback;
+  },
+
+  vfunc_create : function ()
+  {
+    let button = new Button();
+
+    button.set_style_class('CompletionListButton');
+    button.connect('clicked', Lang.bind(this, function ()
+      {
+        this._callback(button);
+      }));
+
+    return button;
+  },
+});
+
 const Widget = new Lang.Class({
   Name: 'Widget',
   /* FIXME: it would be nice to make this inherit from Mx.Table, but it screws
@@ -15,6 +66,7 @@ const Widget = new Lang.Class({
   {
     this.parent();
     this._proxy = proxy;
+    this._block_text_changed = 0;
   },
 
   _construct_completion : function (entry)
@@ -62,13 +114,25 @@ const Widget = new Lang.Class({
         [ GObject.TYPE_STRING, GObject.TYPE_STRING ],
         [ 'City', 'Id' ]);
 
+    let factory = new ButtonFactory(Lang.bind(this, function (button)
+      {
+        this._block_text_changed++;
+
+        print(button.id);
+        entry.set_text(button.get_label());
+        frame.hide();
+
+        this._block_text_changed--;
+      }));
+
     let view = new Mx.ListView({
         'name': 'CompletionListView',
         'model': model,
-        'item-type': Clutter.Text,
+        'factory': factory,
       });
 
-    view.add_attribute('text', 0);
+    view.add_attribute('label', 0);
+    view.add_attribute('id', 1);
     scroll.add_actor(view);
 
     eventbox.connect('button-press-event', function ()
@@ -107,6 +171,9 @@ const Widget = new Lang.Class({
     this._entry_timeout = 0;
     entry.clutter_text.connect('text-changed', Lang.bind(this, function ()
       {
+        if (this._block_text_changed > 0)
+          return;
+
         if (this._entry_timeout > 0)
           MainLoop.source_remove(this._entry_timeout);
 
