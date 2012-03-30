@@ -81,18 +81,16 @@ const Widget = new Lang.Class({
     this._proxy.request_location_async(id, true,
         Lang.bind(this, function (weather)
       {
+        let table = this._weather;
+
+        /* remove the current children */
+        table.foreach(function (actor)
+          {
+            table.remove_actor(actor);
+          });
+
         this._spinner.hide();
         weather.dump();
-
-        if (this._weather)
-          {
-            /* FIXME: generates a lot of unmap warnings */
-            this._weather.destroy();
-          }
-
-        let table = new Mx.Table();
-        this._table.add_actor(table, 1, 0);
-        this._table.child_set_column_span(table, 2);
 
         table.add_actor(new Mx.Label({ 'text': "Now" }), 0, 0);
         table.add_actor(
@@ -114,8 +112,6 @@ const Widget = new Lang.Class({
                 new Mx.Label({ 'text': forecast.lowtemp + DEGREES }),
                 i + 1, 3);
           }
-
-        this._weather = table;
       }));
 
     this._weather_timeout = 0;
@@ -217,7 +213,7 @@ const Widget = new Lang.Class({
     this._model = model;
   },
 
-  get_actor : function ()
+  get_config : function ()
   {
     let table = new Mx.Table();
     let entry = new Mx.Entry({
@@ -287,7 +283,15 @@ const Widget = new Lang.Class({
       }));
 
     this._spinner = spinner;
-    this._table = table;
+
+    return table;
+  },
+
+  get_widget : function ()
+  {
+    let table = new Mx.Table ();
+
+    this._weather = table;
 
     return table;
   },

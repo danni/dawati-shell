@@ -19,8 +19,12 @@ function main()
   let stage = Clutter.Stage.get_default();
   let proxy = new Weather.AccuweatherProxy();
   let widget = new Widget.Widget(proxy);
+  let table = new Mx.Table();
 
-  stage.add_actor(widget.get_actor());
+  table.add_actor(widget.get_config(), 0, 0);
+  table.add_actor(widget.get_widget(), 1, 0);
+
+  stage.add_actor(table);
   stage.show_all();
 
   MainLoop.run('main');
