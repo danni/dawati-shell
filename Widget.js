@@ -15,13 +15,11 @@ const Widget = new Lang.Class({
   {
     this.parent();
     this._proxy = proxy;
-
-    this._completion_constructed = false;
   },
 
   _construct_completion : function (entry)
   {
-    if (this._completion_constructed)
+    if (this._completion)
       return;
 
     const transparent = new Clutter.Color({
@@ -83,19 +81,14 @@ const Widget = new Lang.Class({
 
     frame.connect('show', function ()
       {
-        print("show");
         eventbox.show()
         eventbox.lower(frame);
       });
     frame.connect('hide', function ()
       {
-        print("hide");
         eventbox.hide();
       });
 
-    print("Constructed!");
-
-    this._completion_constructed = true;
     this._completion = frame;
     this._model = model;
   },
