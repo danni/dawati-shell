@@ -69,27 +69,46 @@ const Widget = new Lang.Class({
     this.parent();
     this._proxy = proxy;
 
+    this._metric = true;
+    this._id = '';
+
     this._block_text_changed = 0;
 
     this._entry_timeout = 0;
     this._weather_timeout = 0;
   },
 
-  _update_weather : function (id)
+  update_weather : function ()
   {
-    this._spinner.show()
-    this._proxy.request_location_async(id, true,
+    if (this._id.length == 0)
+      return;
+
+    if (this._weather_timeout > 0)
+        MainLoop.source_remove(this._weather_timeout);
+
+    this._weather_timeout = MainLoop.timeout_add_seconds(60 * 60,
+        Lang.bind(this, function () { this._update_weather() } ));
+
+    this._update_weather();
+  },
+
+  _update_weather : function ()
+  {
+    let table = this._weather;
+
+    /* remove the current children */
+    table.foreach(function (actor)
+      {
+        table.remove_actor(actor);
+      });
+
+    let spinner = new Mx.Spinner();
+    table.add_actor(spinner, 0, 0);
+
+    this._proxy.request_location_async(this._id, this._metric,
         Lang.bind(this, function (weather)
       {
-        let table = this._weather;
-
-        /* remove the current children */
-        table.foreach(function (actor)
-          {
-            table.remove_actor(actor);
-          });
-
-        this._spinner.hide();
+        spinner.destroy();
         weather.dump();
 
         table.add_actor(new Mx.Label({ 'text': "Now" }), 0, 0);
@@ -168,14 +187,9 @@ const Widget = new Lang.Class({
         this._block_text_changed++;
 
         entry.set_text(button.get_label());
+        this._id = button.id;
 
-        if (this._weather_timeout > 0)
-            MainLoop.source_remove(this._weather_timeout);
-
-        this._weather_timeout = MainLoop.timeout_add_seconds(60 * 60,
-            Lang.bind(this, function () { this._update_weather(button.id) } ));
-
-        this._update_weather(button.id);
+        this.update_weather();
         frame.hide();
 
         this._block_text_changed--;
@@ -216,15 +230,35 @@ const Widget = new Lang.Class({
   get_config : function ()
   {
     let table = new Mx.Table();
+
+    let label = new Mx.Label({ 'text': "Temperature" });
+    table.add_actor(label, 0, 0);
+    table.child_set_column_span(label, 2);
+
+    /* FIXME: how do I make this say F/C ? */
+    let tempswitch = new Mx.Toggle();
+    table.add_actor(tempswitch, 1, 0);
+    table.child_set_column_span(tempswitch, 2);
+
+    tempswitch.connect('notify::active', Lang.bind(this, function ()
+      {
+        this._metric = !tempswitch.get_active();
+        this.update_weather();
+      }));
+
+    let label = new Mx.Label({ 'text': "Location" });
+    table.add_actor(label, 2, 0);
+    table.child_set_column_span(label, 2);
+
     let entry = new Mx.Entry({
         'hint-text': "Search for a location",
       });
-    table.add_actor(entry, 0, 0);
+    table.add_actor(entry, 3, 0);
 
     let spinner = new Mx.Spinner({ 'visible': false });
-    table.add_actor(spinner, 0, 1);
+    table.add_actor(spinner, 3, 1);
 
-    entry.clutter_text.connect('text-changed', Lang.bind(this, function ()
+    entry.connect('notify::text', Lang.bind(this, function ()
       {
         if (this._block_text_changed > 0)
           return;
@@ -281,8 +315,6 @@ const Widget = new Lang.Class({
             return false;
           }));
       }));
-
-    this._spinner = spinner;
 
     return table;
   },
