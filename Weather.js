@@ -75,6 +75,7 @@ const CurrentConditions = new Lang.Class({
 
     this.temp = node.find('temperature').content;
     this.humidity = node.find('humidity').content;
+    this.text = node.find('weathertext').content; /* FIXME: i18n? */
   },
 
   dump : function ()
@@ -171,7 +172,7 @@ const AccuweatherProxy = new Lang.Class({
       });
   },
 
-  request_location_async : function (cityid, callback)
+  request_location_async : function (cityid, metric, callback)
   {
     let call = new Rest.ProxyCall({
         'proxy': this,
@@ -180,7 +181,8 @@ const AccuweatherProxy = new Lang.Class({
     /* request the data for a city */
     call.set_function(WEATHER_DATA_FUNC);
     call.add_param('location', cityid);
-    call.add_param('metric', '1');
+    if (metric)
+      call.add_param('metric', '1');
 
     call.invoke_async(null, function (call, result)
       {

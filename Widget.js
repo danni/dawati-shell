@@ -78,7 +78,7 @@ const Widget = new Lang.Class({
   _update_weather : function (id)
   {
     this._spinner.show()
-    this._proxy.request_location_async(id,
+    this._proxy.request_location_async(id, true,
         Lang.bind(this, function (weather)
       {
         this._spinner.hide();
