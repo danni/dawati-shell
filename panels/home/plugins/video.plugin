@@ -1,0 +1,6 @@
+[Plugin]
+Module=video
+Loader=gjs
+IAge=2
+Name=Video Plugin
+Authors=Danielle Madeley <danielle.madeley@collabora.co.uk>
