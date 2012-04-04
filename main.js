@@ -15,6 +15,7 @@ function main()
   const PREFIX = '/home/danni/src/install';
   Mx.Style.get_default().load_from_file(
       PREFIX + '/share/dawati-shell/theme/datetime/date-panel.css');
+  Mx.Style.get_default().load_from_file('weather.css');
 
   let stage = Clutter.Stage.get_default();
   let proxy = new Weather.AccuweatherProxy();

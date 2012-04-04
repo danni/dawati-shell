@@ -1,0 +1,7 @@
+MxFrame.PagerClicky {
+  background-color: #00000000;
+}
+
+MxFrame.PagerClicky:hover {
+  background-color: #00000022;
+}
