@@ -47,9 +47,10 @@ const ButtonFactory = new Lang.Class({
 
   vfunc_create : function ()
   {
-    let button = new Button();
+    let button = new Button({
+        'style-class': 'CompletionListButton',
+      });
 
-    button.set_style_class('CompletionListButton');
     button.connect('clicked', Lang.bind(this, function ()
       {
         this._callback(button);
