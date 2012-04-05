@@ -5,3 +5,18 @@ MxFrame.PagerClicky {
 MxFrame.PagerClicky:hover {
   background-color: #00000022;
 }
+
+*.WeatherTileTitle {
+}
+
+*.WeatherTileDay, *.WeatherObservations {
+  background-color: #dddddddd;
+}
+
+*.WeatherTileDay, *.WeatherObservations MxLabel {
+  padding: 3 3 3 3;
+}
+
+*.CurrentTemperature {
+  font-size: 20pt;
+}

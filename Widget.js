@@ -6,6 +6,8 @@ imports.gi.versions.Mx = '2.0';
 const Mx = imports.gi.Mx;
 const GObject = imports.gi.GObject;
 
+const Pager = imports.Pager;
+
 const DEGREES = "\u00B0";
 
 const Button = new Lang.Class({
@@ -62,8 +64,6 @@ const ButtonFactory = new Lang.Class({
 
 const Widget = new Lang.Class({
   Name: 'Widget',
-  /* FIXME: it would be nice to make this inherit from Mx.Table, but it screws
-   * up the widget allocation. IDK why */
 
   _init : function (proxy)
   {
@@ -95,7 +95,7 @@ const Widget = new Lang.Class({
 
   _update_weather : function ()
   {
-    let table = this._weather;
+    let table = this._widget;
 
     /* remove the current children */
     table.foreach(function (actor)
@@ -103,8 +103,14 @@ const Widget = new Lang.Class({
         table.remove_actor(actor);
       });
 
+    let title = new Mx.Label({
+        'style-class': 'WeatherTileTitle',
+        'text': "Loading",
+      });
+    table.add_actor(title, 0, 0);
+
     let spinner = new Mx.Spinner();
-    table.add_actor(spinner, 0, 0);
+    table.add_actor(spinner, 0, 1);
 
     this._proxy.request_location_async(this._id, this._metric,
         Lang.bind(this, function (weather)
@@ -112,30 +118,92 @@ const Widget = new Lang.Class({
         spinner.destroy();
         weather.dump();
 
-        table.add_actor(new Mx.Label({ 'text': "Now" }), 0, 0);
-        table.add_actor(
-            new Mx.Label({ 'text': weather.current.temp + DEGREES }),
-            0, 2);
+        /* FIXME: translation */
+        title.set_text(weather.city + " Weather");
 
-        for (let i = 0; i < weather.forecast.length; i++)
-          {
-            let forecast = weather.forecast[i];
+        let pager = new Pager.Pager();
+        table.add_actor(pager, 1, 0);
 
-            table.add_actor(
-                new Mx.Label({ 'text': forecast.dayname }),
-                i + 1, 0);
-            /* FIXME: icon */
-            table.add_actor(
-                new Mx.Label({ 'text': forecast.hightemp + DEGREES }),
-                i + 1, 2);
-            table.add_actor(
-                new Mx.Label({ 'text': forecast.lowtemp + DEGREES }),
-                i + 1, 3);
-          }
+        pager.add_page(this._build_today_page(weather));
+
+        for (let i = 1; i < weather.forecast.length; i++)
+          pager.add_page(this._build_forecast_page(weather.forecast[i]));
       }));
 
     this._weather_timeout = 0;
     return true;
+  },
+
+  _build_today_page : function (weather)
+  {
+    let forecast = weather.forecast[0];
+    let table = new Mx.Table();
+
+    let label = new Mx.Label({
+        'style-class': 'WeatherTileDay',
+        'text': "Today",
+      });
+    table.add_actor(label, 0, 0);
+
+    let image = new Mx.Image();
+    image.set_from_file('images/' + weather.current.iconnum + '.GIF');
+    table.add_actor(image, 1, 0);
+
+    let subtable = new Mx.Table({
+        'style-class': 'WeatherObservations',
+      });
+    table.add_actor(subtable, 2, 0);
+
+    let label = new Mx.Label({
+        'style-class': 'CurrentTemperature',
+        'text': weather.current.temp + DEGREES + weather.units.temp,
+      });
+    subtable.add_actor(label, 0, 0);
+    subtable.child_set_row_span(label, 2);
+
+    let label = new Mx.Label({
+        'text': weather.current.text
+      });
+    subtable.add_actor(label, 0, 1);
+    subtable.child_set_column_span(label, 2);
+
+    subtable.add_actor(new Mx.Label({
+        'text': "Hi: " + forecast.hightemp + DEGREES + forecast.units.temp,
+      }), 1, 1);
+    subtable.add_actor(new Mx.Label({
+        'text': "Lo: " + forecast.lowtemp + DEGREES + forecast.units.temp,
+      }), 1, 2);
+
+    return table;
+  },
+
+  _build_forecast_page : function (forecast)
+  {
+    let table = new Mx.Table();
+
+    table.add_actor(new Mx.Label({
+        'text': forecast.dayname,
+        'style-class': 'WeatherTileDay',
+      }), 0, 0);
+
+    // FIXME: we don't know the icon for forecasts
+    // let image = new Mx.Image();
+    // image.set_from_file('images/02.GIF');
+    // table.add_actor(image, 1, 0);
+
+    let subtable = new Mx.Table({
+        'style-class': 'WeatherObservations',
+      });
+    table.add_actor(subtable, 2, 0);
+
+    subtable.add_actor(new Mx.Label({
+        'text': "Hi: " + forecast.hightemp + DEGREES + forecast.units.temp,
+      }), 3, 0);
+    subtable.add_actor(new Mx.Label({
+        'text': "Lo: " + forecast.lowtemp + DEGREES + forecast.units.temp,
+      }), 4, 0);
+
+    return table;
   },
 
   _construct_completion : function (entry)
@@ -322,10 +390,8 @@ const Widget = new Lang.Class({
 
   get_widget : function ()
   {
-    let table = new Mx.Table ();
+    this._widget = new Mx.Table();
 
-    this._weather = table;
-
-    return table;
+    return this._widget;
   },
 });

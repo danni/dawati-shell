@@ -76,6 +76,7 @@ const CurrentConditions = new Lang.Class({
     this.temp = node.find('temperature').content;
     this.humidity = node.find('humidity').content;
     this.text = node.find('weathertext').content; /* FIXME: i18n? */
+    this.iconnum = node.find('weathericon').content;
   },
 
   dump : function ()
@@ -110,6 +111,7 @@ const Weather = new Lang.Class({
 
   _init : function (dom)
   {
+    this.city = dom.find('city').content;
     this.units = new Units(dom.find('units'));
     this.current = new CurrentConditions(this.units,
                                          dom.find('currentconditions'));
