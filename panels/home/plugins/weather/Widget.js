@@ -107,10 +107,10 @@ const Widget = new Lang.Class({
         'style-class': 'WeatherTileTitle',
         'text': "Loading",
       });
-    table.add_actor(title, 0, 0);
+    table.insert_actor(title, 0, 0);
 
     let spinner = new Mx.Spinner();
-    table.add_actor(spinner, 0, 1);
+    table.insert_actor(spinner, 0, 1);
 
     this._proxy.request_location_async(this._id, this._metric,
         Lang.bind(this, function (weather)
@@ -122,7 +122,7 @@ const Widget = new Lang.Class({
         title.set_text(weather.city + " Weather");
 
         let pager = new Pager.Pager();
-        table.add_actor(pager, 1, 0);
+        table.insert_actor(pager, 1, 0);
 
         pager.add_page(this._build_today_page(weather));
 
@@ -143,34 +143,34 @@ const Widget = new Lang.Class({
         'style-class': 'WeatherTileDay',
         'text': "Today",
       });
-    table.add_actor(label, 0, 0);
+    table.insert_actor(label, 0, 0);
 
     let image = new Mx.Image();
     image.set_from_file('images/' + weather.current.iconnum + '.GIF');
-    table.add_actor(image, 1, 0);
+    table.insert_actor(image, 1, 0);
 
     let subtable = new Mx.Table({
         'style-class': 'WeatherObservations',
       });
-    table.add_actor(subtable, 2, 0);
+    table.insert_actor(subtable, 2, 0);
 
     let label = new Mx.Label({
         'style-class': 'CurrentTemperature',
         'text': weather.current.temp + DEGREES + weather.units.temp,
       });
-    subtable.add_actor(label, 0, 0);
+    subtable.insert_actor(label, 0, 0);
     subtable.child_set_row_span(label, 2);
 
     let label = new Mx.Label({
         'text': weather.current.text
       });
-    subtable.add_actor(label, 0, 1);
+    subtable.insert_actor(label, 0, 1);
     subtable.child_set_column_span(label, 2);
 
-    subtable.add_actor(new Mx.Label({
+    subtable.insert_actor(new Mx.Label({
         'text': "Hi: " + forecast.hightemp + DEGREES + forecast.units.temp,
       }), 1, 1);
-    subtable.add_actor(new Mx.Label({
+    subtable.insert_actor(new Mx.Label({
         'text': "Lo: " + forecast.lowtemp + DEGREES + forecast.units.temp,
       }), 1, 2);
 
@@ -181,7 +181,7 @@ const Widget = new Lang.Class({
   {
     let table = new Mx.Table();
 
-    table.add_actor(new Mx.Label({
+    table.insert_actor(new Mx.Label({
         'text': forecast.dayname,
         'style-class': 'WeatherTileDay',
       }), 0, 0);
@@ -189,17 +189,17 @@ const Widget = new Lang.Class({
     // FIXME: we don't know the icon for forecasts
     // let image = new Mx.Image();
     // image.set_from_file('images/02.GIF');
-    // table.add_actor(image, 1, 0);
+    // table.insert_actor(image, 1, 0);
 
     let subtable = new Mx.Table({
         'style-class': 'WeatherObservations',
       });
-    table.add_actor(subtable, 2, 0);
+    table.insert_actor(subtable, 2, 0);
 
-    subtable.add_actor(new Mx.Label({
+    subtable.insert_actor(new Mx.Label({
         'text': "Hi: " + forecast.hightemp + DEGREES + forecast.units.temp,
       }), 3, 0);
-    subtable.add_actor(new Mx.Label({
+    subtable.insert_actor(new Mx.Label({
         'text': "Lo: " + forecast.lowtemp + DEGREES + forecast.units.temp,
       }), 4, 0);
 
@@ -296,17 +296,17 @@ const Widget = new Lang.Class({
     this._model = model;
   },
 
-  get_config : function ()
+  get_configuration : function ()
   {
     let table = new Mx.Table();
 
     let label = new Mx.Label({ 'text': "Temperature" });
-    table.add_actor(label, 0, 0);
+    table.insert_actor(label, 0, 0);
     table.child_set_column_span(label, 2);
 
     /* FIXME: how do I make this say F/C ? */
     let tempswitch = new Mx.Toggle();
-    table.add_actor(tempswitch, 1, 0);
+    table.insert_actor(tempswitch, 1, 0);
     table.child_set_column_span(tempswitch, 2);
 
     tempswitch.connect('notify::active', Lang.bind(this, function ()
@@ -316,16 +316,16 @@ const Widget = new Lang.Class({
       }));
 
     let label = new Mx.Label({ 'text': "Location" });
-    table.add_actor(label, 2, 0);
+    table.insert_actor(label, 2, 0);
     table.child_set_column_span(label, 2);
 
     let entry = new Mx.Entry({
         'hint-text': "Search for a location",
       });
-    table.add_actor(entry, 3, 0);
+    table.insert_actor(entry, 3, 0);
 
     let spinner = new Mx.Spinner({ 'visible': false });
-    table.add_actor(spinner, 3, 1);
+    table.insert_actor(spinner, 3, 1);
 
     entry.connect('notify::text', Lang.bind(this, function ()
       {
