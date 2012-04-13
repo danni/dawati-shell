@@ -1,11 +1,34 @@
+/*
+ * Copyright (c) 2012 Intel Corp.
+ *
+ * Author: Danielle Madeley <danielle.madeley@collabora.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 const Lang = imports.lang;
 const MainLoop = imports.mainloop;
 
 imports.gi.versions.Mx = '2.0';
 
 const Mx = imports.gi.Mx;
+const Clutter = imports.gi.Clutter;
 const GObject = imports.gi.GObject;
 
+const Plugins = imports.gi.DawatiHomePlugins;
+
+const Weather = imports.Weather;
 const Pager = imports.Pager;
 
 const DEGREES = "\u00B0";
@@ -64,11 +87,13 @@ const ButtonFactory = new Lang.Class({
 
 const Widget = new Lang.Class({
   Name: 'Widget',
+  Implements: [ Plugins.App ],
 
-  _init : function (proxy)
+  _init : function ()
   {
     this.parent();
-    this._proxy = proxy;
+
+    this._proxy = new Weather.AccuweatherProxy();
 
     this._metric = true;
     this._id = '';
@@ -77,6 +102,14 @@ const Widget = new Lang.Class({
 
     this._entry_timeout = 0;
     this._weather_timeout = 0;
+  },
+
+  init : function ()
+  {
+  },
+
+  deinit : function ()
+  {
   },
 
   update_weather : function ()
