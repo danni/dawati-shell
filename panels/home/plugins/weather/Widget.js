@@ -106,6 +106,10 @@ const Widget = new Lang.Class({
 
   init : function ()
   {
+    this._datadir = this.plugin_info.get_module_dir();
+
+    Mx.Style.get_default().load_from_file(
+        [ this._datadir, 'weather.css' ].join('/'));
   },
 
   deinit : function ()
@@ -179,7 +183,8 @@ const Widget = new Lang.Class({
     table.insert_actor(label, 0, 0);
 
     let image = new Mx.Image();
-    image.set_from_file('images/' + weather.current.iconnum + '.GIF');
+    image.set_from_file(
+        [ this._datadir, 'images', weather.current.iconnum + '.GIF' ].join('/'));
     table.insert_actor(image, 1, 0);
 
     let subtable = new Mx.Table({

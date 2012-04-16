@@ -1,0 +1,6 @@
+[Plugin]
+Module=weather
+Loader=gjs
+IAge=2
+Name=Weather Tile
+Authors=Danielle Madeley <danielle.madeley@collabora.co.uk>
