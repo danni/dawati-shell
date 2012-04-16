@@ -1,0 +1,23 @@
+<schemalist>
+  <schema id="org.dawati.shell.home.plugin.weather">
+    <key name="city-id" type="s">
+      <default>''</default>
+      <summary>City location ID</summary>
+      <description>
+        Location ID for the city, as used by Accuweather.
+      </description>
+    </key>
+
+    <key name="units" type="s">
+      <default>'celcius'</default>
+      <choices>
+        <choice value="celcius"/>
+        <choice value="fahrenheit"/>
+      </choices>
+      <summary>Temperature units</summary>
+      <description>
+        Temperature units, either 'celcius' or 'fahrenheit'
+      </description>
+    </key>
+  </schema>
+</schemalist>
